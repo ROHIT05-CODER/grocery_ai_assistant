@@ -8,7 +8,7 @@ function App() {
 
   const handleAsk = async () => {
     try {
-      const res = await axios.post("https://grocery-backend.onrender.com/ask", {
+      const res = await axios.post("https://grocery-ai-backend.onrender.com", {
         query,
       });
       setAnswer(res.data.answer);

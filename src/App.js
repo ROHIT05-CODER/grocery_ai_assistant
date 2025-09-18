@@ -5,6 +5,7 @@ import "./App.css";
 function App() {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState([]);
+  const [cart, setCart] = useState([]);
   const [message, setMessage] = useState("");
 
   // 🔎 Search items
@@ -19,28 +20,48 @@ function App() {
     }
   };
 
-  // 🛒 Place order
-  const handleOrder = async (item) => {
+  // ➕ Add to Cart
+  const handleAddToCart = (item) => {
+    setCart((prev) => [...prev, item]);
+    setMessage(`${item["Item Name"]} added to cart ✅`);
+  };
+
+  // 🗑️ Remove from Cart
+  const handleRemoveFromCart = (index) => {
+    const updated = [...cart];
+    updated.splice(index, 1);
+    setCart(updated);
+  };
+
+  // 🛒 Place Order (Cart)
+  const handleOrderCart = async () => {
     try {
       const res = await axios.post(
         "https://grocery-ai-backend.onrender.com/api/order",
         {
-          item: item["Item Name"],
-          quantity: "1 unit",
+          items: cart.map((item) => ({
+            item: item["Item Name"],
+            quantity: "1 unit",
+          })),
           customer: "Test User",
         }
       );
       setMessage(res.data.status);
+      setCart([]); // clear cart after order
     } catch (error) {
       setMessage("⚠️ Error placing order.");
     }
   };
 
+  // 💰 Calculate Total
+  const getTotal = () =>
+    cart.reduce((sum, item) => sum + (item["Price (₹)"] || 0), 0);
+
   return (
     <div className="App">
       <header className="App-header">
         <h1>🛒 Grocery AI Assistant</h1>
-        <p>Search groceries and place your order!</p>
+        <p>Search groceries, add to cart, and order!</p>
 
         {/* Search bar */}
         <div style={{ marginTop: "20px" }}>
@@ -95,22 +116,73 @@ function App() {
                   <small>{item.Description}</small>
                   <br />
                   <button
-                    onClick={() => handleOrder(item)}
+                    onClick={() => handleAddToCart(item)}
                     style={{
                       marginTop: "8px",
                       padding: "6px 12px",
                       borderRadius: "6px",
                       border: "none",
-                      backgroundColor: "#2196F3",
+                      backgroundColor: "#FF9800",
                       color: "white",
                       cursor: "pointer",
                     }}
                   >
-                    Order
+                    ➕ Add to Cart
                   </button>
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {/* Cart */}
+        {cart.length > 0 && (
+          <div style={{ marginTop: "30px", textAlign: "left" }}>
+            <h3>🛒 Your Cart:</h3>
+            <ul>
+              {cart.map((item, idx) => (
+                <li
+                  key={idx}
+                  style={{
+                    marginBottom: "10px",
+                    border: "1px solid #ccc",
+                    padding: "8px",
+                    borderRadius: "6px",
+                  }}
+                >
+                  {item["Item Name"]} - ₹{item["Price (₹)"]}
+                  <button
+                    onClick={() => handleRemoveFromCart(idx)}
+                    style={{
+                      marginLeft: "10px",
+                      padding: "4px 8px",
+                      border: "none",
+                      borderRadius: "6px",
+                      backgroundColor: "red",
+                      color: "white",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ❌ Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <h4>Total: ₹{getTotal()}</h4>
+            <button
+              onClick={handleOrderCart}
+              style={{
+                padding: "10px 20px",
+                borderRadius: "8px",
+                border: "none",
+                backgroundColor: "#2196F3",
+                color: "white",
+                fontSize: "16px",
+                cursor: "pointer",
+              }}
+            >
+              ✅ Place Order
+            </button>
           </div>
         )}
 

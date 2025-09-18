@@ -15,14 +15,26 @@ function App() {
         `https://grocery-ai-backend.onrender.com/api/items?q=${query}`
       );
       setItems(res.data);
+      setMessage("");
     } catch (error) {
       setMessage("⚠️ Error: Could not connect to backend.");
     }
   };
 
-  // ➕ Add to Cart
+  // ➕ Add to Cart (with quantity check)
   const handleAddToCart = (item) => {
-    setCart((prev) => [...prev, item]);
+    setCart((prev) => {
+      const existing = prev.find((p) => p["Item Name"] === item["Item Name"]);
+      if (existing) {
+        return prev.map((p) =>
+          p["Item Name"] === item["Item Name"]
+            ? { ...p, qty: (p.qty || 1) + 1 }
+            : p
+        );
+      } else {
+        return [...prev, { ...item, qty: 1 }];
+      }
+    });
     setMessage(`${item["Item Name"]} added to cart ✅`);
   };
 
@@ -41,21 +53,27 @@ function App() {
         {
           items: cart.map((item) => ({
             item: item["Item Name"],
-            quantity: "1 unit",
+            quantity: item.qty || 1,
+            price: item["Price (₹)"],
           })),
           customer: "Test User",
+          total: getTotal(),
         }
       );
-      setMessage(res.data.status);
+      setMessage(`✅ ${res.data.status}`);
       setCart([]); // clear cart after order
     } catch (error) {
+      console.error(error);
       setMessage("⚠️ Error placing order.");
     }
   };
 
   // 💰 Calculate Total
   const getTotal = () =>
-    cart.reduce((sum, item) => sum + (item["Price (₹)"] || 0), 0);
+    cart.reduce(
+      (sum, item) => sum + (item["Price (₹)"] || 0) * (item.qty || 1),
+      0
+    );
 
   return (
     <div className="App">
@@ -150,7 +168,7 @@ function App() {
                     borderRadius: "6px",
                   }}
                 >
-                  {item["Item Name"]} - ₹{item["Price (₹)"]}
+                  {item["Item Name"]} - ₹{item["Price (₹)"]} × {item.qty}
                   <button
                     onClick={() => handleRemoveFromCart(idx)}
                     style={{

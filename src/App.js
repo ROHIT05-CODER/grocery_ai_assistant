@@ -10,9 +10,8 @@ function App() {
   const [customer, setCustomer] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [notes, setNotes] = useState(""); // ✅ Notes state
 
-  // 🛠️ Axios instance
+  // 🛠️ Axios instance (backend URL common)
   const api = axios.create({
     baseURL: "https://grocery-ai-backend.onrender.com/api",
   });
@@ -77,7 +76,6 @@ function App() {
         customer,
         phone,
         address,
-        notes, // ✅ send notes to backend
         total: getTotal(),
       });
       setMessage(`✅ ${res.data.status} | Total: ₹${res.data.total}`);
@@ -85,7 +83,6 @@ function App() {
       setCustomer("");
       setPhone("");
       setAddress("");
-      setNotes(""); // ✅ clear notes
     } catch {
       setMessage("⚠️ Order failed!");
     }
@@ -206,13 +203,6 @@ function App() {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="📍 Enter delivery address"
-                style={{ padding: "8px", width: "250px", margin: "4px" }}
-              />
-              <br />
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="📝 Write any notes or instructions"
                 style={{ padding: "8px", width: "250px", margin: "4px" }}
               />
             </div>

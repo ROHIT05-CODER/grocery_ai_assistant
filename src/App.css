@@ -1,118 +1,59 @@
-/* ============================= */
-/*         Global Styles         */
-/* ============================= */
 .App {
   text-align: center;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f6fa; /* softer background */
+  background-color: #f9f9f9;
   min-height: 100vh;
   padding: 20px;
-  color: #333;
 }
 
-/* ============================= */
-/*        Header / Card          */
-/* ============================= */
 .App-header {
   margin: 0 auto;
-  max-width: 850px;
-  background: #ffffff;
-  padding: 40px 30px;
-  border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-
-.App-header:hover {
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+  max-width: 800px;
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
-  color: #2c3e50;
-  font-size: 2.2rem;
-  margin-bottom: 10px;
+  color: #333;
 }
 
 p {
   color: #555;
-  font-size: 1.1rem;
-  margin-bottom: 25px;
+  font-size: 18px;
 }
 
-/* ============================= */
-/*           Inputs              */
-/* ============================= */
-input[type="text"],
-textarea {
-  padding: 12px 14px;
+input[type="text"] {
+  padding: 10px;
   width: 300px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 16px;
-  margin: 5px 0;
   transition: 0.3s;
-  box-sizing: border-box;
 }
 
-input[type="text"]:focus,
-textarea:focus {
+input[type="text"]:focus {
   border-color: #4caf50;
   outline: none;
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.2);
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
 }
 
-/* ============================= */
-/*           Buttons             */
-/* ============================= */
 button {
   padding: 10px 20px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: none;
+  background-color: #4caf50;
+  color: white;
   font-size: 16px;
   cursor: pointer;
   transition: 0.3s;
-  color: white;
 }
 
 button:hover {
-  filter: brightness(0.9);
-}
-
-.btn-add {
-  background-color: #ff9800;
-}
-
-.btn-add:hover {
-  background-color: #e68a00;
-}
-
-.btn-remove {
-  background-color: #f44336;
-}
-
-.btn-remove:hover {
-  background-color: #d32f2f;
-}
-
-.btn-order {
-  background-color: #2196f3;
-}
-
-.btn-order:hover {
-  background-color: #1976d2;
-}
-
-.btn-search {
-  background-color: #4caf50;
-}
-
-.btn-search:hover {
   background-color: #45a049;
 }
 
-/* ============================= */
-/*           Lists               */
-/* ============================= */
 ul {
   list-style: none;
   padding: 0;
@@ -120,64 +61,39 @@ ul {
 
 li {
   background: #fafafa;
-  margin-bottom: 15px;
-  padding: 18px 20px;
-  border-radius: 15px;
+  margin-bottom: 12px;
+  padding: 15px;
+  border-radius: 10px;
   text-align: left;
-  border: 1px solid #e0e0e0;
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
+  border: 1px solid #ddd;
+  transition: 0.3s;
 }
 
 li:hover {
-  background: #f0f0f0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: #f1f1f1;
 }
 
 li b {
-  color: #2c3e50;
-  font-size: 1.1rem;
+  color: #222;
 }
 
 li small {
   display: block;
-  color: #777;
-  margin-top: 6px;
+  color: #666;
+  margin-top: 4px;
   font-size: 14px;
 }
 
 li button {
-  margin-top: 12px;
-  width: fit-content;
+  margin-top: 10px;
+  background-color: #2196f3;
 }
 
-/* ============================= */
-/*          Cart & Summary       */
-/* ============================= */
-h3 {
-  color: #2c3e50;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 5px;
+li button:hover {
+  background-color: #1976d2;
 }
 
 h4 {
-  color: #2c3e50;
+  color: #333;
   margin-top: 20px;
-  font-weight: 600;
-}
-
-/* ============================= */
-/*         Responsive            */
-/* ============================= */
-@media (max-width: 600px) {
-  input[type="text"],
-  textarea {
-    width: 90%;
-  }
-
-  .App-header {
-    padding: 25px 20px;
-  }
-}
+} proffessional laa mathu da

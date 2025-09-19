@@ -7,6 +7,9 @@ function App() {
   const [items, setItems] = useState([]);
   const [cart, setCart] = useState([]);
   const [message, setMessage] = useState("");
+  const [customer, setCustomer] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
 
   // 🛠️ Axios instance (backend URL common)
   const api = axios.create({
@@ -54,6 +57,15 @@ function App() {
   // 🛒 Place order
   const handleOrder = async () => {
     if (!cart.length) return setMessage("⚠️ Cart is empty!");
+    if (!customer || !phone || !address)
+      return setMessage("⚠️ Please enter customer details!");
+
+    // 📞 Validate phone number (+91 and 10 digits)
+    const phoneRegex = /^\+91[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+      return setMessage("⚠️ Enter phone in format +911234567890");
+    }
+
     try {
       const res = await api.post("/order", {
         items: cart.map((i) => ({
@@ -61,11 +73,16 @@ function App() {
           quantity: i.qty,
           price: i["Price (₹)"],
         })),
-        customer: "Test User",
+        customer,
+        phone,
+        address,
         total: getTotal(),
       });
-      setMessage(`✅ ${res.data.status}`);
+      setMessage(`✅ ${res.data.status} | Total: ₹${res.data.total}`);
       setCart([]);
+      setCustomer("");
+      setPhone("");
+      setAddress("");
     } catch {
       setMessage("⚠️ Order failed!");
     }
@@ -165,6 +182,31 @@ function App() {
               ))}
             </ul>
             <h4>Total: ₹{getTotal()}</h4>
+
+            {/* 🧑 Customer Details */}
+            <div style={{ marginBottom: 15 }}>
+              <input
+                value={customer}
+                onChange={(e) => setCustomer(e.target.value)}
+                placeholder="👤 Enter your name"
+                style={{ padding: "8px", width: "250px", margin: "4px" }}
+              />
+              <br />
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="📞 Enter phone (+91XXXXXXXXXX)"
+                style={{ padding: "8px", width: "250px", margin: "4px" }}
+              />
+              <br />
+              <textarea
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="📍 Enter delivery address"
+                style={{ padding: "8px", width: "250px", margin: "4px" }}
+              />
+            </div>
+
             <button onClick={handleOrder} style={btnStyle("#2196F3")}>
               ✅ Place Order
             </button>

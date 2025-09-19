@@ -8,124 +8,118 @@ function App() {
   const [cart, setCart] = useState([]);
   const [message, setMessage] = useState("");
 
+  // 🛠️ Axios instance (backend URL common)
+  const api = axios.create({
+    baseURL: "https://grocery-ai-backend.onrender.com/api",
+  });
+
   // 🔎 Search items
   const handleSearch = async () => {
+    if (!query.trim()) return setMessage("⚠️ Enter item name!");
     try {
-      const res = await axios.get(
-        `https://grocery-ai-backend.onrender.com/api/items?q=${query}`
-      );
+      const res = await api.get(`/items?q=${query}`);
       setItems(res.data);
-      setMessage("");
-    } catch (error) {
-      setMessage("⚠️ Error: Could not connect to backend.");
+      setMessage(res.data.length ? "" : "❌ No items found");
+    } catch {
+      setMessage("⚠️ Backend connection error.");
     }
   };
 
-  // ➕ Add to Cart (with quantity check)
+  // ➕ Add to Cart
   const handleAddToCart = (item) => {
     setCart((prev) => {
-      const existing = prev.find((p) => p["Item Name"] === item["Item Name"]);
-      if (existing) {
-        return prev.map((p) =>
-          p["Item Name"] === item["Item Name"]
-            ? { ...p, qty: (p.qty || 1) + 1 }
-            : p
-        );
-      } else {
-        return [...prev, { ...item, qty: 1 }];
-      }
+      const exist = prev.find((p) => p["Item Name"] === item["Item Name"]);
+      return exist
+        ? prev.map((p) =>
+            p["Item Name"] === item["Item Name"]
+              ? { ...p, qty: (p.qty || 1) + 1 }
+              : p
+          )
+        : [...prev, { ...item, qty: 1 }];
     });
-    setMessage(`${item["Item Name"]} added to cart ✅`);
+    setMessage(`${item["Item Name"]} added ✅`);
   };
 
-  // 🗑️ Remove from Cart
-  const handleRemoveFromCart = (index) => {
-    const updated = [...cart];
-    updated.splice(index, 1);
-    setCart(updated);
-  };
+  // 🗑 Remove from cart
+  const handleRemoveFromCart = (i) =>
+    setCart((prev) => prev.filter((_, idx) => idx !== i));
 
-  // 🛒 Place Order (Cart)
-  const handleOrderCart = async () => {
+  // 💰 Cart total
+  const getTotal = () =>
+    cart.reduce(
+      (sum, i) => sum + (i["Price (₹)"] || 0) * (i.qty || 1),
+      0
+    );
+
+  // 🛒 Place order
+  const handleOrder = async () => {
+    if (!cart.length) return setMessage("⚠️ Cart is empty!");
     try {
-      const res = await axios.post(
-        "https://grocery-ai-backend.onrender.com/api/order",
-        {
-          items: cart.map((item) => ({
-            item: item["Item Name"],
-            quantity: item.qty || 1,
-            price: item["Price (₹)"],
-          })),
-          customer: "Test User",
-          total: getTotal(),
-        }
-      );
+      const res = await api.post("/order", {
+        items: cart.map((i) => ({
+          item: i["Item Name"],
+          quantity: i.qty,
+          price: i["Price (₹)"],
+        })),
+        customer: "Test User",
+        total: getTotal(),
+      });
       setMessage(`✅ ${res.data.status}`);
-      setCart([]); // clear cart after order
-    } catch (error) {
-      console.error(error);
-      setMessage("⚠️ Error placing order.");
+      setCart([]);
+    } catch {
+      setMessage("⚠️ Order failed!");
     }
   };
 
-  // 💰 Calculate Total
-  const getTotal = () =>
-    cart.reduce(
-      (sum, item) => sum + (item["Price (₹)"] || 0) * (item.qty || 1),
-      0
-    );
+  // 🎨 Button style
+  const btnStyle = (bg) => ({
+    padding: "8px 14px",
+    margin: "4px",
+    borderRadius: "6px",
+    border: "none",
+    backgroundColor: bg,
+    color: "white",
+    cursor: "pointer",
+  });
 
   return (
     <div className="App">
       <header className="App-header">
         <h1>🛒 Grocery AI Assistant</h1>
-        <p>Search groceries, add to cart, and order!</p>
+        <p>Search groceries, add to cart & order instantly</p>
 
-        {/* Search bar */}
-        <div style={{ marginTop: "20px" }}>
+        {/* 🔍 Search */}
+        <div style={{ marginTop: 20 }}>
           <input
-            type="text"
-            placeholder="Search item (e.g., Apple)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search item (e.g., Apple)..."
             style={{
               padding: "10px",
-              width: "300px",
+              width: "280px",
               borderRadius: "8px",
               border: "1px solid #ccc",
               fontSize: "16px",
             }}
           />
-          <button
-            onClick={handleSearch}
-            style={{
-              padding: "10px 20px",
-              marginLeft: "10px",
-              borderRadius: "8px",
-              border: "none",
-              backgroundColor: "#4CAF50",
-              color: "white",
-              fontSize: "16px",
-              cursor: "pointer",
-            }}
-          >
+          <button onClick={handleSearch} style={btnStyle("#4CAF50")}>
             Search
           </button>
         </div>
 
-        {/* Search results */}
+        {/* 📦 Results */}
         {items.length > 0 && (
-          <div style={{ marginTop: "30px", textAlign: "left" }}>
+          <div style={{ marginTop: 30, textAlign: "left" }}>
             <h3>Results:</h3>
             <ul>
               {items.map((item, idx) => (
                 <li
                   key={idx}
                   style={{
-                    marginBottom: "12px",
+                    marginBottom: 12,
                     border: "1px solid #ddd",
-                    padding: "10px",
-                    borderRadius: "8px",
+                    padding: 10,
+                    borderRadius: 8,
                   }}
                 >
                   <b>{item["Item Name"]}</b> ({item.Category}) - ₹
@@ -135,17 +129,9 @@ function App() {
                   <br />
                   <button
                     onClick={() => handleAddToCart(item)}
-                    style={{
-                      marginTop: "8px",
-                      padding: "6px 12px",
-                      borderRadius: "6px",
-                      border: "none",
-                      backgroundColor: "#FF9800",
-                      color: "white",
-                      cursor: "pointer",
-                    }}
+                    style={btnStyle("#FF9800")}
                   >
-                    ➕ Add to Cart
+                    ➕ Add
                   </button>
                 </li>
               ))}
@@ -153,33 +139,25 @@ function App() {
           </div>
         )}
 
-        {/* Cart */}
+        {/* 🛒 Cart */}
         {cart.length > 0 && (
-          <div style={{ marginTop: "30px", textAlign: "left" }}>
-            <h3>🛒 Your Cart:</h3>
+          <div style={{ marginTop: 30, textAlign: "left" }}>
+            <h3>Your Cart</h3>
             <ul>
               {cart.map((item, idx) => (
                 <li
                   key={idx}
                   style={{
-                    marginBottom: "10px",
+                    marginBottom: 10,
                     border: "1px solid #ccc",
-                    padding: "8px",
-                    borderRadius: "6px",
+                    padding: 8,
+                    borderRadius: 6,
                   }}
                 >
                   {item["Item Name"]} - ₹{item["Price (₹)"]} × {item.qty}
                   <button
                     onClick={() => handleRemoveFromCart(idx)}
-                    style={{
-                      marginLeft: "10px",
-                      padding: "4px 8px",
-                      border: "none",
-                      borderRadius: "6px",
-                      backgroundColor: "red",
-                      color: "white",
-                      cursor: "pointer",
-                    }}
+                    style={btnStyle("red")}
                   >
                     ❌ Remove
                   </button>
@@ -187,29 +165,14 @@ function App() {
               ))}
             </ul>
             <h4>Total: ₹{getTotal()}</h4>
-            <button
-              onClick={handleOrderCart}
-              style={{
-                padding: "10px 20px",
-                borderRadius: "8px",
-                border: "none",
-                backgroundColor: "#2196F3",
-                color: "white",
-                fontSize: "16px",
-                cursor: "pointer",
-              }}
-            >
+            <button onClick={handleOrder} style={btnStyle("#2196F3")}>
               ✅ Place Order
             </button>
           </div>
         )}
 
-        {/* Status / Message */}
-        {message && (
-          <div style={{ marginTop: "20px" }}>
-            <h4>{message}</h4>
-          </div>
-        )}
+        {/* 📢 Status */}
+        {message && <h4 style={{ marginTop: 20 }}>{message}</h4>}
       </header>
     </div>
   );

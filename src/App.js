@@ -7,13 +7,12 @@ function App() {
   const [items, setItems] = useState([]);
   const [cart, setCart] = useState([]);
   const [message, setMessage] = useState("");
-
-  // customer details
   const [customer, setCustomer] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [notes, setNotes] = useState(""); // ✅ Notes state
 
-  // 🛠️ Axios instance (backend URL common)
+  // 🛠️ Axios instance
   const api = axios.create({
     baseURL: "https://grocery-ai-backend.onrender.com/api",
   });
@@ -62,6 +61,12 @@ function App() {
     if (!customer || !phone || !address)
       return setMessage("⚠️ Please enter customer details!");
 
+    // 📞 Validate phone number (+91 and 10 digits)
+    const phoneRegex = /^\+91[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+      return setMessage("⚠️ Enter phone in format +911234567890");
+    }
+
     try {
       const res = await api.post("/order", {
         items: cart.map((i) => ({
@@ -72,6 +77,7 @@ function App() {
         customer,
         phone,
         address,
+        notes, // ✅ send notes to backend
         total: getTotal(),
       });
       setMessage(`✅ ${res.data.status} | Total: ₹${res.data.total}`);
@@ -79,6 +85,7 @@ function App() {
       setCustomer("");
       setPhone("");
       setAddress("");
+      setNotes(""); // ✅ clear notes
     } catch {
       setMessage("⚠️ Order failed!");
     }
@@ -100,31 +107,6 @@ function App() {
       <header className="App-header">
         <h1>🛒 Grocery AI Assistant</h1>
         <p>Search groceries, add to cart & order instantly</p>
-
-        {/* 👤 Customer Details */}
-        <div style={{ marginTop: 20, textAlign: "left" }}>
-          <h3>Customer Details</h3>
-          <input
-            value={customer}
-            onChange={(e) => setCustomer(e.target.value)}
-            placeholder="Customer Name"
-            style={{ padding: "10px", width: "280px", margin: "5px" }}
-          />
-          <br />
-          <input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Phone Number"
-            style={{ padding: "10px", width: "280px", margin: "5px" }}
-          />
-          <br />
-          <textarea
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Delivery Address"
-            style={{ padding: "10px", width: "280px", margin: "5px" }}
-          />
-        </div>
 
         {/* 🔍 Search */}
         <div style={{ marginTop: 20 }}>
@@ -203,6 +185,38 @@ function App() {
               ))}
             </ul>
             <h4>Total: ₹{getTotal()}</h4>
+
+            {/* 🧑 Customer Details */}
+            <div style={{ marginBottom: 15 }}>
+              <input
+                value={customer}
+                onChange={(e) => setCustomer(e.target.value)}
+                placeholder="👤 Enter your name"
+                style={{ padding: "8px", width: "250px", margin: "4px" }}
+              />
+              <br />
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="📞 Enter phone (+91XXXXXXXXXX)"
+                style={{ padding: "8px", width: "250px", margin: "4px" }}
+              />
+              <br />
+              <textarea
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="📍 Enter delivery address"
+                style={{ padding: "8px", width: "250px", margin: "4px" }}
+              />
+              <br />
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="📝 Write any notes or instructions"
+                style={{ padding: "8px", width: "250px", margin: "4px" }}
+              />
+            </div>
+
             <button onClick={handleOrder} style={btnStyle("#2196F3")}>
               ✅ Place Order
             </button>

@@ -1,0 +1,26 @@
+.holo-container {
+  text-align: center;
+  margin-top: 20px;
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.voice-btn {
+  padding: 15px 30px;
+  font-size: 18px;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(135deg, #4caf50, #81c784);
+  color: white;
+  cursor: pointer;
+  margin-bottom: 20px;
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+}
+
+.speech-bubble {
+  background: rgba(0, 255, 0, 0.2);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}

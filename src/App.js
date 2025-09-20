@@ -1,7 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 import "./App.css";
-import HologramAssistant from "./HoloAssistant";
+import HoloAssistant from "./HologramAssistant";
+
 
 
 function App() {

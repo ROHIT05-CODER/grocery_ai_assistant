@@ -1,6 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 import "./App.css";
+import HologramAssistant from "./HoloAssistant";
+
 
 function App() {
   const [query, setQuery] = useState("");

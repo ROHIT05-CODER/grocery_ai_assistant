@@ -11,7 +11,7 @@ function App() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
-  // 🛠️ Axios instance (backend URL common)
+  // 🛠️ Axios instance
   const api = axios.create({
     baseURL: "https://grocery-ai-backend.onrender.com/api",
   });
@@ -38,9 +38,18 @@ function App() {
               ? { ...p, qty: (p.qty || 1) + 1 }
               : p
           )
-        : [...prev, { ...item, qty: 1 }]; 
+        : [...prev, { ...item, qty: 1 }];
     });
     setMessage(`${item["Item Name"]} added ✅`);
+  };
+
+  // 🔄 Update Quantity (increase / decrease)
+  const handleUpdateQty = (idx, change) => {
+    setCart((prev) =>
+      prev.map((item, i) =>
+        i === idx ? { ...item, qty: Math.max(1, (item.qty || 1) + change) } : item
+      )
+    );
   };
 
   // 🗑 Remove from cart
@@ -57,7 +66,7 @@ function App() {
     if (!customer || !phone || !address)
       return setMessage("⚠️ Please enter customer details!");
 
-    // 📞 Validate phone number (only 10 digits)
+    // 📞 Validate phone
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(phone)) {
       return setMessage("⚠️ Enter a valid 10-digit phone number");
@@ -89,8 +98,8 @@ function App() {
 
   // 🎨 Button style
   const btnStyle = (bg) => ({
-    padding: "8px 14px",
-    margin: "4px",
+    padding: "6px 12px",
+    margin: "2px",
     borderRadius: "6px",
     border: "none",
     backgroundColor: bg,
@@ -171,6 +180,19 @@ function App() {
                   }}
                 >
                   {item["Item Name"]} - ₹{item["Price (₹)"]} × {item.qty}
+                  <br />
+                  <button
+                    onClick={() => handleUpdateQty(idx, -1)}
+                    style={btnStyle("#9C27B0")}
+                  >
+                    ➖
+                  </button>
+                  <button
+                    onClick={() => handleUpdateQty(idx, 1)}
+                    style={btnStyle("#009688")}
+                  >
+                    ➕
+                  </button>
                   <button
                     onClick={() => handleRemoveFromCart(idx)}
                     style={btnStyle("red")}

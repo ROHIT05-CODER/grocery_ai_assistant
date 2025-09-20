@@ -38,7 +38,7 @@ function App() {
               ? { ...p, qty: (p.qty || 1) + 1 }
               : p
           )
-        : [...prev, { ...item, qty: 1 }];
+        : [...prev, { ...item, qty: 1 }]; 
     });
     setMessage(`${item["Item Name"]} added ✅`);
   };
@@ -49,10 +49,7 @@ function App() {
 
   // 💰 Cart total
   const getTotal = () =>
-    cart.reduce(
-      (sum, i) => sum + (i["Price (₹)"] || 0) * (i.qty || 1),
-      0
-    );
+    cart.reduce((sum, i) => sum + (i["Price (₹)"] || 0) * (i.qty || 1), 0);
 
   // 🛒 Place order
   const handleOrder = async () => {
@@ -60,11 +57,13 @@ function App() {
     if (!customer || !phone || !address)
       return setMessage("⚠️ Please enter customer details!");
 
-    // 📞 Validate phone number (+91 and 10 digits)
-    const phoneRegex = /^\+91[0-9]{10}$/;
+    // 📞 Validate phone number (only 10 digits)
+    const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(phone)) {
-      return setMessage("⚠️ Enter phone in format +911234567890");
+      return setMessage("⚠️ Enter a valid 10-digit phone number");
     }
+
+    const formattedPhone = `+91${phone}`;
 
     try {
       const res = await api.post("/order", {
@@ -74,7 +73,7 @@ function App() {
           price: i["Price (₹)"],
         })),
         customer,
-        phone,
+        phone: formattedPhone,
         address,
         total: getTotal(),
       });
@@ -195,7 +194,8 @@ function App() {
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="📞 Enter phone (+91XXXXXXXXXX)"
+                placeholder="📞 Enter 10-digit phone"
+                maxLength={10}
                 style={{ padding: "8px", width: "250px", margin: "4px" }}
               />
               <br />

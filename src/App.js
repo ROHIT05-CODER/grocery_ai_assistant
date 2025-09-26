@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from "react-speech-recognition";
+import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import AvatarScene from "./AvatarScene";   // ✅ Avatar added
 import "./App.css";
 
 function App() {
@@ -13,31 +12,28 @@ function App() {
   const [customer, setCustomer] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [speaking, setSpeaking] = useState(false); // ✅ avatar mouth control
 
   const api = axios.create({
     baseURL: "https://grocery-ai-backend.onrender.com/api",
   });
 
-  // 🎤 Speech-to-Text hook
+  // 🎤 Speech-to-Text
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
-  // 🗣️ Tamil speech output (safe browser check)
+  // 🗣 Tamil speech output
   const speakTamil = (text) => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      const speech = new SpeechSynthesisUtterance(text);
-      speech.lang = "ta-IN"; // Tamil
-      window.speechSynthesis.speak(speech);
-    }
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "ta-IN";
+    setSpeaking(true); // avatar start talking
+    speech.onend = () => setSpeaking(false); // stop when voice ends
+    window.speechSynthesis.speak(speech);
   };
 
   // 🔎 Search items
   const handleSearch = async (voiceQuery) => {
     const searchTerm = voiceQuery || query;
-    if (!searchTerm.trim()) {
-      setMessage("⚠️ ஒரு பொருளின் பெயரை உள்ளிடவும்");
-      speakTamil("ஒரு பொருளின் பெயரை உள்ளிடவும்");
-      return;
-    }
+    if (!searchTerm.trim()) return setMessage("⚠️ ஒரு பொருளின் பெயரை உள்ளிடவும்");
 
     try {
       const res = await api.get(`/items?q=${searchTerm}`);
@@ -71,7 +67,7 @@ function App() {
         : [...prev, { ...item, qty: 1 }];
     });
 
-    const msg = `${item["Item Name"]} வண்டியில் சேர்க்கப்பட்டது`;
+    const msg = `${item["Item Name"]} கூடையில் சேர்க்கப்பட்டது`;
     setMessage(msg);
     speakTamil(msg);
   };
@@ -88,7 +84,7 @@ function App() {
   // 🗑 Remove
   const handleRemoveFromCart = (i) => {
     setCart((prev) => prev.filter((_, idx) => idx !== i));
-    speakTamil("பொருள் வண்டியில் இருந்து அகற்றப்பட்டது");
+    speakTamil("பொருள் கூடையில் இருந்து அகற்றப்பட்டது");
   };
 
   // 💰 Total
@@ -98,8 +94,8 @@ function App() {
   // 🛒 Place Order
   const handleOrder = async () => {
     if (!cart.length) {
-      speakTamil("⚠️ வண்டி காலியாக உள்ளது");
-      return setMessage("⚠️ வண்டி காலியாக உள்ளது");
+      speakTamil("⚠️ கூடை காலியாக உள்ளது");
+      return setMessage("⚠️கூடையி காலியாக உள்ளது");
     }
     if (!customer || !phone || !address) {
       speakTamil("⚠️ வாடிக்கையாளர் விவரங்களை உள்ளிடவும்");
@@ -141,7 +137,7 @@ function App() {
     }
   };
 
-  // 🎤 Mic start/stop
+  // 🎤 Mic control
   const handleMic = () => {
     if (listening) {
       SpeechRecognition.stopListening();
@@ -150,10 +146,7 @@ function App() {
         resetTranscript();
       }
     } else {
-      SpeechRecognition.startListening({
-        continuous: false,
-        language: "en-IN", // 👈 here change to "ta-IN" if you want Tamil STT
-      });
+      SpeechRecognition.startListening({ continuous: false, language: "en-IN" });
     }
   };
 
@@ -173,6 +166,9 @@ function App() {
       <header className="App-header">
         <h1>🛒 Grocery AI Assistant</h1>
         <p>பொருட்களை தேடவும், வண்டியில் சேர்க்கவும், ஆர்டர் செய்யவும்</p>
+
+        {/* 🤖 Avatar */}
+        <AvatarScene speaking={speaking} />
 
         {/* 🔍 Search + Mic */}
         <div style={{ marginTop: 20 }}>
@@ -231,7 +227,7 @@ function App() {
         {/* 🛒 Cart */}
         {cart.length > 0 && (
           <div style={{ marginTop: 30, textAlign: "left" }}>
-            <h3>🛒 உங்கள் வண்டி</h3>
+            <h3>🛒 உங்கள்ி கூடை</h3>
             <ul>
               {cart.map((item, idx) => (
                 <li

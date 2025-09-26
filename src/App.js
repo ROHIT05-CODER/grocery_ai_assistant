@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 import "./App.css";
 
 function App() {
@@ -19,17 +21,23 @@ function App() {
   // 🎤 Speech-to-Text hook
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
-  // 🗣️ Tamil speech output
+  // 🗣️ Tamil speech output (safe browser check)
   const speakTamil = (text) => {
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = "ta-IN"; // Tamil voice
-    window.speechSynthesis.speak(speech);
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      const speech = new SpeechSynthesisUtterance(text);
+      speech.lang = "ta-IN"; // Tamil
+      window.speechSynthesis.speak(speech);
+    }
   };
 
   // 🔎 Search items
   const handleSearch = async (voiceQuery) => {
     const searchTerm = voiceQuery || query;
-    if (!searchTerm.trim()) return setMessage("⚠️ ஒரு பொருளின் பெயரை உள்ளிடவும்");
+    if (!searchTerm.trim()) {
+      setMessage("⚠️ ஒரு பொருளின் பெயரை உள்ளிடவும்");
+      speakTamil("ஒரு பொருளின் பெயரை உள்ளிடவும்");
+      return;
+    }
 
     try {
       const res = await api.get(`/items?q=${searchTerm}`);
@@ -38,7 +46,6 @@ function App() {
       if (res.data.length) {
         const item = res.data[0];
         const reply = `${item["Item Name"]} விலை ₹${item["Price (₹)"]} ரூபாய்`;
-
         setMessage(reply);
         speakTamil(reply);
       } else {
@@ -143,7 +150,10 @@ function App() {
         resetTranscript();
       }
     } else {
-      SpeechRecognition.startListening({ continuous: false, language: "en-IN" });
+      SpeechRecognition.startListening({
+        continuous: false,
+        language: "en-IN", // 👈 here change to "ta-IN" if you want Tamil STT
+      });
     }
   };
 

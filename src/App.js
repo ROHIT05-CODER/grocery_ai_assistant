@@ -21,17 +21,20 @@ function App() {
   // 🎤 Speech-to-Text
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
-  // 🗣 Tamil speech output
-  const speakTamil = (text) => {
+  // 🗣 Tamil speech output (prevent overlap)
+  const speakTamil = (text: string) => {
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
     const speech = new SpeechSynthesisUtterance(text);
     speech.lang = "ta-IN";
-    setSpeaking(true); // avatar start talking
-    speech.onend = () => setSpeaking(false); // stop when voice ends
+    setSpeaking(true);
+    speech.onend = () => setSpeaking(false);
     window.speechSynthesis.speak(speech);
   };
 
   // 🔎 Search items
-  const handleSearch = async (voiceQuery) => {
+  const handleSearch = async (voiceQuery?: string) => {
     const searchTerm = voiceQuery || query;
     if (!searchTerm.trim()) return setMessage("⚠️ ஒரு பொருளின் பெயரை உள்ளிடவும்");
 
@@ -55,7 +58,7 @@ function App() {
   };
 
   // ➕ Add to Cart
-  const handleAddToCart = (item) => {
+  const handleAddToCart = (item: any) => {
     setCart((prev) => {
       const exist = prev.find((p) => p["Item Name"] === item["Item Name"]);
       return exist
@@ -73,7 +76,7 @@ function App() {
   };
 
   // 🔄 Update Qty
-  const handleUpdateQty = (idx, change) => {
+  const handleUpdateQty = (idx: number, change: number) => {
     setCart((prev) =>
       prev.map((item, i) =>
         i === idx ? { ...item, qty: Math.max(1, (item.qty || 1) + change) } : item
@@ -82,7 +85,7 @@ function App() {
   };
 
   // 🗑 Remove
-  const handleRemoveFromCart = (i) => {
+  const handleRemoveFromCart = (i: number) => {
     setCart((prev) => prev.filter((_, idx) => idx !== i));
     speakTamil("பொருள் கூடையில் இருந்து அகற்றப்பட்டது");
   };
@@ -95,7 +98,7 @@ function App() {
   const handleOrder = async () => {
     if (!cart.length) {
       speakTamil("⚠️ கூடை காலியாக உள்ளது");
-      return setMessage("⚠️கூடையி காலியாக உள்ளது");
+      return setMessage("⚠️ கூடை காலியாக உள்ளது");
     }
     if (!customer || !phone || !address) {
       speakTamil("⚠️ வாடிக்கையாளர் விவரங்களை உள்ளிடவும்");
@@ -127,6 +130,7 @@ function App() {
       setMessage(msg);
       speakTamil(msg);
 
+      // reset
       setCart([]);
       setCustomer("");
       setPhone("");
@@ -146,12 +150,15 @@ function App() {
         resetTranscript();
       }
     } else {
-      SpeechRecognition.startListening({ continuous: false, language: "en-IN" });
+      SpeechRecognition.startListening({
+        continuous: false,
+        language: "ta-IN", // ✅ Tamil speech
+      });
     }
   };
 
   // 🎨 Button style
-  const btnStyle = (bg) => ({
+  const btnStyle = (bg: string) => ({
     padding: "6px 12px",
     margin: "2px",
     borderRadius: "6px",
@@ -227,7 +234,7 @@ function App() {
         {/* 🛒 Cart */}
         {cart.length > 0 && (
           <div style={{ marginTop: 30, textAlign: "left" }}>
-            <h3>🛒 உங்கள்ி கூடை</h3>
+            <h3>🛒 உங்களின் கூடை</h3>
             <ul>
               {cart.map((item, idx) => (
                 <li
